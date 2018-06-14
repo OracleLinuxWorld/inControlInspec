@@ -1,8 +1,10 @@
-name: TB_Linux
-title: InSpec Profile
-maintainer: The Authors
-copyright: The Authors
-copyright_email: you@example.com
-license: Apache-2.0
-summary: An InSpec Compliance Profile
-version: 0.1.0
+name: profile
+title: Inspec Profile Linux Technical Baseline
+maintainer: emielkuiper@gmail.com
+copyright: emielkuiper@gmail.com
+copyright_email: emielkuiper@gmail.com
+license: GPL-3
+summary: Test compliancy of Linux servers against the technical baseline controls in the controls directory
+version: 1.0.0
+supports:
+  - os-family: unix

@@ -3,7 +3,7 @@ title: Inspec Profile Linux Technical Baseline
 maintainer: emielkuiper@gmail.com
 copyright: emielkuiper@gmail.com
 copyright_email: emielkuiper@gmail.com
-license: GPL-3
+license: GPL-3.0
 summary: Test compliancy of Linux servers against the technical baseline controls in the controls directory
 version: 1.0.0
 supports:

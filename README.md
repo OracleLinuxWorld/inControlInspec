@@ -20,16 +20,18 @@ The following points are not directly a part of the project (at this moment) how
 In the root of the project you will find a Makefile.
 This Makefile will contain directives for various actions.
 
+### JSON output
 Run the following command:
 
 ```
-$ make check
-inspec exec controls/ --reporter json| jq '.profiles[] | { Controls: .controls[] } | { ControlID: .Controls.tags.controlID, Name: .Controls.title, CheckID: .Controls.tags.checkID, Description: .Controls.desc, Results: .Controls.results[].status }'
+make check
 ```
 
 for results looking like the following:
 
 ```
+$ make check
+inspec exec controls/ --reporter json| jq '.profiles[] | { Controls: .controls[] } | { ControlID: .Controls.tags.controlID, Name: .Controls.title, CheckID: .Controls.tags.checkID, Description: .Controls.desc, Results: .Controls.results[].status }'
 {
   "ControlID": "6",
   "Name": "Event logging storage and protection",
@@ -60,3 +62,40 @@ for results looking like the following:
 }
 ```
 
+### CSV output
+Run the following command:
+
+```
+$ make -s csv
+```
+
+for CSV formatted output like the following:
+
+```
+"CheckID","ControlID","Description","Name","Results"
+"1","6","Various checks regarding /var/log","Event logging storage and protection","passed"
+"1","0","Verify that /etc/modprobe.d is a directory","Handling of removable media (physical and virtual)","passed"
+"2","0","Verify that /etc/modprobe.d and underlying files have mode 0755 and are only writeable by owner","Handling of removable media (physical and virtual)","passed"
+"3","0","Verify that /etc/modprobe.d and underlying files are owned by the root user","Handling of removable media (physical and virtual)","passed"
+```
+
+
+### Output for European (Dutch) Excel-compatible CSV (separated with ;)
+Run the following command:
+
+```
+$ make -s excel-nl
+```
+
+for CSV formatted output like the following:
+
+```
+$ make -s excel-nl
+"CheckID";"ControlID";"Description";"Name";"Results"
+"1";"6";"Various checks regarding /var/log";"Event logging storage and protection";"passed"
+"1";"0";"Verify that /etc/modprobe.d is a directory";"Handling of removable media (physical and virtual)";"passed"
+"2";"0";"Verify that /etc/modprobe.d and underlying files have mode 0755 and are only writeable by owner";"Handling of removable media (physical and virtual)";"passed"
+"3";"0";"Verify that /etc/modprobe.d and underlying files are owned by the root user";"Handling of removable media (physical and virtual)";"passed"
+```
+
+The columns are separated with ; instead of , so Excel will skip the import wizard and import the data automatically.

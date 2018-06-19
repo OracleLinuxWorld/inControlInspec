@@ -3,6 +3,7 @@ def tocsv($x):
     |(map(keys)
         |add
         |unique
+        |sort
     ) as $cols
     |map(. as $row
         |$cols

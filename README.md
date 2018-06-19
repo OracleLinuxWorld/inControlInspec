@@ -102,5 +102,5 @@ The columns are separated with ; instead of , so Excel will skip the import wiza
 
 To restore the correct column order after jq sorts the keys, please use the following:
 ```
-sudo make -s excel-nl | awk -F\; '{print $2";"$1";"$3";"$4";"$5}'
+sudo make -s excel-nl | awk -F\; '{print $2";"$1";"$4";"$3";"$5}'
 ```

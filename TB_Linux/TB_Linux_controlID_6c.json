@@ -1,0 +1,9 @@
+{
+  "Timestamp": "2018-11-01",
+  "Hostname": "devops.localdomain",
+  "ControlID": "6",
+  "Name": "Event logging storage and protection",
+  "CheckID": "1",
+  "Description": "Various checks regarding /var/log",
+  "Results": "passed"
+}

@@ -1,7 +1,5 @@
 #!/bin/sh
 
-# export TIMESTAMP=`date --iso-8601`
-# export TIMESTAMP=`date '+%Y-%m-%d %H:%M:%S'`
 export TIMESTAMP=`date '+%Y/%m/%d %H:%M:%S'`
 
 cd controls && ls *.rb | while read line

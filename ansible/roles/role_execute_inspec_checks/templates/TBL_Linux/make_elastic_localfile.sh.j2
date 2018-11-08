@@ -1,0 +1,6 @@
+#!/bin/sh
+
+cd {{ tbl_check_remote_inspec_control_dir }} && ls *.rb | while read line
+  do
+    inspec exec $line --reporter json| jq '.profiles[] | [{ Controls: .controls[] } | { Timestamp: {{ ansible_control_node_date_time }}, Hostname: "{{ inventory_hostname }}", ControlID: .Controls.tags.controlID, Name: .Controls.title, CheckID: .Controls.tags.checkID, Description: .Controls.desc, Results: .Controls.results[].status }] | .[]' > {{ tbl_check_json_output_dir_remote }}/$line.json
+  done

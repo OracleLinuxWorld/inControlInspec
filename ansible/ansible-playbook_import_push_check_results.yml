@@ -1,0 +1,11 @@
+###
+### Set up the following:
+### * dockernodes
+
+- hosts:          bh_es_dockernodes
+
+  vars_files:
+  - group_vars/all
+
+  roles:
+    - role: role_docker

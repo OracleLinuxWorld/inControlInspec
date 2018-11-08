@@ -1,0 +1,54 @@
+#############################################################################
+###
+### YUM repos
+###
+
+  - name: Add CHEF {{ chef_channel }} repo
+    yum_repository:
+      name: "chef-{{ chef_channel }}"
+      description: Elasticsearch repo
+      baseurl: https://packages.chef.io/repos/yum/{{ chef_channel }}/el/{{ chef_el_version }}/\$basearch/
+      gpgcheck: 1
+      gpgkey: https://packages.chef.io/chef.asc
+      enabled: 1
+    when: chef_use_repository
+
+
+###
+### Opening ports in firewall
+###
+
+#  - name: Firewalld Allow access on necessary ports
+#    firewalld:
+#      state: enabled
+#      permanent: true
+#      immediate: true
+#      port: '{{ item }}'
+#    with_items:
+#      - 1234/tcp
+
+
+#############################################################################
+###
+### Install packages
+###
+
+  - name: Installing InSpec packages on Linux servers
+    yum:
+      name:
+        - inspec
+      state: latest
+      update_cache: yes
+    when:
+      - inventory_hostname in groups['tbl_checklist']
+
+  - name: Installing Inspec PLUS additional packages on control node
+    yum:
+      name:
+        - inspec
+        - jq
+        - curl
+      state: latest
+      update_cache: yes
+    when:
+      - inventory_hostname in groups['control_node']

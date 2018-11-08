@@ -1,0 +1,15 @@
+# 1) Install Inspec in remote server
+- import_playbook: ansible-playbook_import_yum_install_inspec.yml
+  tags:
+    - yum
+
+# 2) Run remote Inspec tests and collect results
+- import_playbook: ansible-playbook_import_execute_inspec_checks.yml
+  tags:
+    - checks
+    - check
+
+# 3) Push Inspec results to Elasticsearch & remove local files
+#- import_playbook: ansible-playbook_import_push_check_results.yml
+#  tags:
+#    - push

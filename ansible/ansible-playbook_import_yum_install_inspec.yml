@@ -1,0 +1,11 @@
+###
+### Set up YUM
+###
+
+- hosts:         tbl_checklist, control_node
+
+  vars_files:
+  - group_vars/all
+
+  roles:
+    - role: role_inspec_yum_install

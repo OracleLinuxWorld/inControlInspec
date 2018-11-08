@@ -1,0 +1,87 @@
+#####
+##### YUM and package settings
+#####
+
+# Flag to enable the chef repo (only set to true on a machine with internet access)
+chef_use_repository:      "true"
+
+# stable or current
+chef_channel: "stable"
+
+# EL Linux version 6 or 7
+chef_el_version: "7"
+
+
+###
+### Time
+###
+
+# Example:     2018-11-07
+# Used for creating daily directories to store test results
+ansible_control_node_date: "{{ hostvars[groups['ansible_control_node'][0]]['ansible_date_time'].date }}"
+
+#inspec_reporter_timestamp: "+%Y/%m/%d %H:%M:%S"
+# used for setting the date and timestamp in generated json files on VMs during inspec checks
+ansible_control_node_date_time: "{{ hostvars[groups['ansible_control_node'][0]]['ansible_date_time'].epoch }}"
+
+
+#####
+##### Backend storage (Elasticsearch / Kibana)
+#####
+
+### URL Elasticsearch JSON document store
+# Assumption: Elasticsearch runs on the Ansible control server
+elasticsearch_url:      "127.0.0.1:9200"
+
+
+###
+### Variables for "Technical Baseline Linux"
+###
+
+# remote tmp dir
+# Chosen this directory because it is cleaned periodically
+remote_tmp: "/tmp"
+
+# Local dir with actual Inspec controls
+tbl_check_local_inspec_control_dir: "files/TB_Linux/controls"
+
+# Remote InSpec base directory on all VMs
+tbl_check_remote_inspec_base_dir: "{{ remote_tmp}}/TB_Linux"
+
+# Remote dir on all VMs with actual Inspec controls
+tbl_check_remote_inspec_control_dir: "{{ tbl_check_remote_inspec_base_dir }}/controls"
+
+# Remote dir to collect control json outputs
+# Use a different directory for each day
+tbl_check_output_dir_tmp: "{{ remote_tmp }}/tbl_outputs/{{ ansible_control_node_date }}"
+
+# Remote dir to collect control json outputs
+tbl_check_json_output_dir_remote: "{{ remote_tmp }}/tbl_outputs/{{ ansible_control_node_date }}"
+
+# Local dir to gather all fetched JSON outputs
+tbl_check_json_output_dir_local: "/tmp/tbl_outputs/{{ ansible_control_node_date }}"
+
+
+
+# inspec_profile variables
+inspec_profile_title: "Inspec Profile Linux Technical Baseline"
+inspec_profile_maintainer: "Some Maintainer"
+inspec_profile_copyright: "Some Copyright holder"
+inspec_profile_copyright_email: "some_copyright_owner@example.com"
+inspec_profile_license: "GPL-3.0"
+inspec_profile_summary: "Test compliancy of Linux servers against the technical baseline controls in the controls directory"
+inspec_profile_version: "1.0.0"
+inspec_profile_supports_os_family: "unix"
+
+
+
+
+# Define interface and IP adress where the various daemon processes will listen
+es_service_interface: "ens192"
+es_service_ip_address: "{{ hostvars[inventory_hostname]['ansible_' + es_service_interface].ipv4.address }}"
+
+
+
+# LOGSTASH NODES
+# Not necessary?
+es_logstash_hosts:         "{{ groups['es_logstashnodes'] | to_json }}"

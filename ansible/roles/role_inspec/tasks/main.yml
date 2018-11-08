@@ -1,0 +1,197 @@
+#############################################################################
+###
+### YUM repos
+###
+
+  - name: Copy docker-ce.repo
+    copy:
+      src: files/docker-ce.repo
+      dest: /etc/yum.repos.d/docker-ce.repo
+      mode: 0755
+      owner: root
+      group: root
+    when:
+      - inventory_hostname in groups['bh_es_dockernodes']
+      - docker_use_repository
+
+
+###
+### Opening ports in firewall
+###
+
+  - name: Firewalld Allow access on necessary ports
+    firewalld:
+      state: enabled
+      permanent: true
+      immediate: true
+      port: '{{ item }}'
+    with_items:
+      - 2376/tcp
+      - 2377/tcp
+      - 4789/udp
+      - 6378/tcp
+      - 6379/tcp
+      - 7946/tcp
+      - 7946/udp
+
+
+#############################################################################
+###
+### Install packages
+###
+
+  - name: Installing additional packages
+    yum:
+      name: "{{ item }}"
+      state: latest
+      update_cache: yes
+    with_items:
+      - jq
+      - docker-ce
+      - curl
+      - wget
+      - tcpdump
+    when:
+      - inventory_hostname in groups['bh_es_dockernodes']
+
+
+#############################################################################
+###
+### /etc/docker
+###
+
+  - name: Creating directory /etc/docker
+    file:
+      path: "/etc/docker"
+      owner: root
+      group: root
+      state: directory
+
+#############################################################################
+###
+### Copy Docker config file
+###
+
+  - name: Templating daemon json config file
+    template:
+      src: templates/daemon.json.j2
+      dest: "/etc/docker/daemon.json"
+      owner: "root"
+      group: "root"
+      mode: 0755
+    tags:
+      - docker
+      - daemon.json
+
+#############################################################################
+###
+### Enabling and starting services at boot
+###
+
+  - debug:
+      msg: "Getting the various services up and running..."
+
+  - name: Start and enable services at boot time
+    systemd:
+       name: "{{ item }}"
+       state: started
+       enabled: True
+       daemon_reload: yes
+    with_items:
+       - docker
+    when:
+       - inventory_hostname in groups['bh_es_dockernodes']
+
+
+#############################################################################
+###
+### Initialise Swarm
+###
+
+
+### Checks
+
+  - name: Determine if swarm is already active
+    shell: "docker info | grep ^Swarm | cut -d ' ' -f2"
+    register: swarm_state
+    when:
+      - inventory_hostname in groups['bh_es_dockernodes']
+    tags:
+      - swarm-init
+
+  - name: Display if swarm is active
+    debug:
+      msg: "Swarm is ALREADY ACTIVE"
+    when:
+      - inventory_hostname in groups['bh_es_dockernodes']
+      - "'inactive' not in swarm_state.stdout_lines"
+    tags:
+      - swarm-init
+
+  - name: Display if swarm is NOT active
+    debug:
+      msg: "Swarm is NOT ACTIVE"
+    when:
+      - inventory_hostname in groups['bh_es_dockernodes']
+      - "'inactive' in swarm_state.stdout_lines"
+    tags:
+      - swarm-init
+
+
+### Initialise
+
+  - name: Initialize swarm on master node only IF swarm is not already active
+    shell: "docker swarm init --advertise-addr {{ swarm_iface | default('eth1') }}"
+    when:
+      - inventory_hostname in groups['bh_es_dockernodes_initial_manager']
+      - "'inactive' in swarm_state.stdout_lines"
+    tags:
+      - swarm-init
+
+
+### Get join tokens
+
+  - name: Join tokens
+    debug:
+      msg: "Getting join tokens for manager nodes"
+    when:
+      - inventory_hostname in groups['bh_es_dockernodes_initial_manager']
+      - "'inactive' not in swarm_state.stdout_lines"
+    tags:
+      - swarm-init
+
+  - name: Get swarm token for managers
+    shell: "docker swarm join-token -q manager"
+    when:
+      - inventory_hostname in groups['bh_es_dockernodes_initial_manager']
+    register: swarm_token_manager
+    tags:
+      - swarm-init
+
+  - name: Get swarm connect string for workers
+    shell: "docker swarm join-token manager | grep token"
+    when:
+      - inventory_hostname in groups['bh_es_dockernodes_initial_manager']
+    register: swarm_manager_connectstring
+    tags:
+      - swarm-init
+
+  - name: Set facts for connect
+    set_fact:
+      connectstring: "{{ swarm_manager_connectstring }}"
+    when:
+      - inventory_hostname in groups['bh_es_dockernodes_initial_manager']
+    tags:
+      - swarm-init
+
+
+
+
+### Add the rest of the nodes to the Swarm as MANAGERS
+
+  - name: Use connect string on docker nodes that are NOT already in swarm
+    shell: "{{ hostvars[groups['bh_es_dockernodes_initial_manager'][0]]['swarm_manager_connectstring']['stdout'] }}"
+    ignore_errors: yes
+    when:
+      - inventory_hostname not in groups['bh_es_dockernodes_initial_manager']
+      - "'inactive' in swarm_state.stdout_lines"

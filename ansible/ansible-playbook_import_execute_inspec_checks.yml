@@ -1,0 +1,8 @@
+
+- hosts:          tbl_checklist, ansible_control_node
+
+  vars_files:
+  - group_vars/all
+
+  roles:
+    - role: role_execute_inspec_checks

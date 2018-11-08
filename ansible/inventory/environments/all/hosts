@@ -1,0 +1,8 @@
+[tbl_checklist]
+127.0.0.1
+
+[control_node]
+127.0.0.1
+
+[ansible_control_node]
+127.0.0.1
